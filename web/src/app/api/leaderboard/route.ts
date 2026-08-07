@@ -1,26 +1,31 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/admin";
-import {
-  aggregateWinsFromMmView,
-  aggregateWinsFromVotes,
-  computeElo,
-  winRate,
-} from "@/lib/elo";
+import { createPublicClient } from "@/lib/supabase/public";
+import { aggregateWinsFromMmView, computeElo, winRate } from "@/lib/elo";
 import type { LeaderboardData } from "@/lib/types";
 
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
 import { resolveRunForLanguage } from "@/lib/arena-run";
 
 async function loadModelVsModelWins(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  scriptIds: string[]
+  supabase: ReturnType<typeof createPublicClient>,
+  scriptIds: string[],
+  benchModelIds: string[]
 ) {
   if (!scriptIds.length) {
     return { wins: {}, totals: {} };
   }
 
-  // Preferred: public aggregate view filtered by script (migration 007).
+  const benchSet = new Set(benchModelIds);
+
+  // Best: SECURITY DEFINER RPC (migration 007).
+  const { data: rpcRows, error: rpcErr } = await supabase.rpc("leaderboard_mm_wins", {
+    p_script_ids: scriptIds,
+  });
+  if (!rpcErr && rpcRows) {
+    return aggregateWinsFromMmView(rpcRows);
+  }
+
+  // View filtered by language scripts (migration 007).
   const { data: viewRows, error: viewErr } = await supabase
     .from("v_model_vs_model_wins_by_script")
     .select("winner_id, loser_id, n")
@@ -30,35 +35,29 @@ async function loadModelVsModelWins(
     return aggregateWinsFromMmView(viewRows || []);
   }
 
-  // Migration 007 not applied yet — legacy global view (anon-readable, all languages combined).
+  // Legacy global view — keep only matchups between models on this language's bench.
   const { data: globalRows, error: globalErr } = await supabase
     .from("v_model_vs_model_wins")
     .select("winner_id, loser_id, n");
 
   if (!globalErr && globalRows?.length) {
-    return aggregateWinsFromMmView(globalRows);
+    const filtered = benchSet.size
+      ? globalRows.filter(
+          (r) => benchSet.has(r.winner_id as string) && benchSet.has(r.loser_id as string)
+        )
+      : globalRows;
+    return aggregateWinsFromMmView(filtered);
   }
 
-  // Last resort: service role votes table.
-  try {
-    const admin = createServiceClient();
-    const { data: votes } = await admin
-      .from("votes")
-      .select(
-        "vote_type, result, clip_a_type, clip_a_model_id, clip_b_type, clip_b_model_id, script_id"
-      )
-      .in("script_id", scriptIds);
-    return aggregateWinsFromVotes(votes || [], "model_vs_model");
-  } catch {
-    return { wins: {}, totals: {} };
-  }
+  return { wins: {}, totals: {} };
 }
 
+/** Public leaderboard — no login required; identical for all visitors. */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const languageCode = searchParams.get("language") || DEFAULT_ARENA_LANGUAGE;
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: lang } = await supabase.from("languages").select("id").eq("code", languageCode).single();
   if (!lang) {
@@ -82,7 +81,7 @@ export async function GET(request: Request) {
 
   const [{ data: allModels }, mm, { data: issueRows }] = await Promise.all([
     supabase.from("models").select("*").eq("active", true).order("sort_order"),
-    loadModelVsModelWins(supabase, scriptIds),
+    loadModelVsModelWins(supabase, scriptIds, benchModelIds),
     supabase.from("v_issue_counts_by_model").select("*"),
   ]);
 
@@ -96,6 +95,7 @@ export async function GET(request: Request) {
   }
 
   const modelIds = models.map((m) => m.id);
+  const modelSlugSet = new Set(models.map((m) => m.slug));
 
   const { data: voiceRows } = await supabase
     .from("model_voices")
@@ -149,10 +149,13 @@ export async function GET(request: Request) {
   const issueCounts: Record<string, Record<string, number>> = {};
   for (const row of issueRows || []) {
     const slug = row.model_slug as string;
+    if (!modelSlugSet.has(slug)) continue;
     issueCounts[slug] = issueCounts[slug] || {};
     issueCounts[slug][row.issue_slug as string] = row.n as number;
   }
 
   const payload: LeaderboardData = { models: ranked, h2h, vsHuman, issueCounts };
-  return NextResponse.json(payload);
+  return NextResponse.json(payload, {
+    headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
+  });
 }
