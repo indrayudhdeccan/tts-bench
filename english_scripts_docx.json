@@ -1,0 +1,302 @@
+[
+  {
+    "script_no": 1,
+    "domain": "Cinema",
+    "named_entity": "Deepika Padukone",
+    "text": "Deepika Padukone, a bollywood actress has compellingly portrayed complex, emotionally layered characters earning her critical acclaim internationally."
+  },
+  {
+    "script_no": 2,
+    "domain": "Music",
+    "named_entity": "A.R. Rahman",
+    "text": "Oscar-winning composer A.R. Rahman produces hauntingly beautiful film scores that transcends linguistic and cultural boundaries worldwide."
+  },
+  {
+    "script_no": 3,
+    "domain": "Rap",
+    "named_entity": "Divine",
+    "text": "Divine is a Mumbai-based rapper who uses gritty, street-rooted lyrics to authentically chronicle the struggles of India's urban underclass."
+  },
+  {
+    "script_no": 4,
+    "domain": "Sports",
+    "named_entity": "Virat Kohli",
+    "text": "Cricketing maestro Virat Kohli's relentless intensity and unparalleled consistency have redefined modern batting excellence."
+  },
+  {
+    "script_no": 5,
+    "domain": "Science",
+    "named_entity": "S. Chandrasekhar",
+    "text": "We can try to recreate Astrophysicist Subrahmanyan Chandrasekhar's groundbreaking theoretical work on stellar collapse, but that’s a mammoth of a task"
+  },
+  {
+    "script_no": 6,
+    "domain": "Business",
+    "named_entity": "Ratan Tata",
+    "text": "Industrialist Ratan Tata's philanthropic initiatives have had a profound impact on India's healthcare and educational infrastructure."
+  },
+  {
+    "script_no": 7,
+    "domain": "Politics",
+    "named_entity": "Pinnarayi Vijayan",
+    "text": "The former chief minister of Kerala, Pinnarayi Vijayan has arguably had an incredible effect on the middle class in the state albeit at the expense of state treasury levels."
+  },
+  {
+    "script_no": 8,
+    "domain": "Monument",
+    "named_entity": "Red Fort",
+    "text": "I feel like the resplendent red sandstone of Red Fort really exemplifies the zenith of Mughal architectural grandeur."
+  },
+  {
+    "script_no": 9,
+    "domain": "Chef",
+    "named_entity": "Vikas Khanna",
+    "text": "Chef Vikas Khanna's innovative fusion cuisine genuinely bridges traditional Indian flavors with contemporary culinary techniques, bringing you the ultimate gastronomic experience."
+  },
+  {
+    "script_no": 10,
+    "domain": "Acronym",
+    "named_entity": "MGNREGA",
+    "text": "The MGNREGA is a very timely scheme in India’s path towards self-sustainance and economic survival in a world filled with uncertain employment rates, and capital flows."
+  },
+  {
+    "script_no": 11,
+    "domain": "Pop",
+    "named_entity": "Taylor Swift",
+    "text": "There are a handful of artists whose remarkably candid, autobiographical lyrics resonate profoundly with millions of devoted fans across generations, one of them being Taylor Swift."
+  },
+  {
+    "script_no": 12,
+    "domain": "Rap",
+    "named_entity": "Eminem",
+    "text": "At a time when Hip-hop was predominantly filled with African American Artists,  Eminem's work revolutionized the technical possibilities of hip-hop lyricism."
+  },
+  {
+    "script_no": 13,
+    "domain": "Sports",
+    "named_entity": "Lionel Messi",
+    "text": "If you’re an Argentine and you haven’t heard of Lionel Messi's extraordinary dribbling finesse and uncanny goal-scoring instinct, then you must be living under a rock."
+  },
+  {
+    "script_no": 14,
+    "domain": "Business",
+    "named_entity": "Jeff Bezos",
+    "text": "Jeff Bezos's audacious expansion of e-commerce fundamentally revolutionized global retail and logistics infrastructure to a point where individuals don’t realize the scale of impact."
+  },
+  {
+    "script_no": 15,
+    "domain": "Acronym",
+    "named_entity": "MEDICAID",
+    "text": "Sweeping changes to Medicaid managed care rules and regulations in 2016 and 2024 included provisions related to beneficiary protections, access, and program oversight, including new managed care reporting and oversight requirements and efforts to promote transparency."
+  },
+  {
+    "script_no": 16,
+    "domain": "Chef",
+    "named_entity": "Jamie Oliver",
+    "text": "British chef Jamie Oliver's tireless advocacy for nutritious school meals significantly influenced public health policy across the United Kingdom."
+  },
+  {
+    "script_no": 17,
+    "domain": "Monument",
+    "named_entity": "Great Wall of China",
+    "text": "The Great Wall of China's staggering, serpentine expanse across mountainous terrain remains one of humanity's most awe-inspiring engineering feats till date."
+  },
+  {
+    "script_no": 18,
+    "domain": "Literature",
+    "named_entity": "J.K. Rowling",
+    "text": "J.K. Rowling's richly imaginative Harry Potter universe captivated an entire generation of readers worldwide without even the slightest hint of obsolescence."
+  },
+  {
+    "script_no": 19,
+    "domain": "Science",
+    "named_entity": "Albert Einstein",
+    "text": "Albert Einstein as a theoretical physicist has been instrumental in creating the revolutionary theory of relativity because of the way he transformed humanity's understanding of space and time."
+  },
+  {
+    "script_no": 20,
+    "domain": "Music",
+    "named_entity": "Adele",
+    "text": "Did you hear Adele’s latest number in the James Bond movie? Some of her pieces are so emotionally raw, and feel like powerhouse ballads!"
+  },
+  {
+    "script_no": 21,
+    "domain": null,
+    "named_entity": null,
+    "text": "Just as the concrete in children's playgrounds has been covered with rubber, so the hard truth about the effort needed for intellectual attainment is being softened by a sort of semantic padding"
+  },
+  {
+    "script_no": 22,
+    "domain": null,
+    "named_entity": null,
+    "text": "Universities are now being called upon to help write new A-level syllabuses in order to cram our little children with knowledge that, in recent years, has come to seem unpalatable, if not indigestible - knowledge such as English vocabulary beyond that which is in common usage."
+  },
+  {
+    "script_no": 23,
+    "domain": null,
+    "named_entity": null,
+    "text": "Bahar’s civilisational paradigm, predicated on the notion of linguistic integrity and the association of a people with its language, came from European philology."
+  },
+  {
+    "script_no": 24,
+    "domain": null,
+    "named_entity": null,
+    "text": "it's just that these works are no longer regarded as the desiderata that any well-cultivated person aspires to an appreciation of."
+  },
+  {
+    "script_no": 25,
+    "domain": null,
+    "named_entity": null,
+    "text": "The end result of this will be a standardisation of understanding itself, as people become unable to think outside of the box-shaped screen."
+  },
+  {
+    "script_no": 26,
+    "domain": null,
+    "named_entity": null,
+    "text": "Let us call the first kind ‘the beauty of the geometers’, and associate it with quantitative properties traditionally said to cause aesthetic pleasure: symmetry, harmony, proportion, regularity and so on."
+  },
+  {
+    "script_no": 27,
+    "domain": null,
+    "named_entity": null,
+    "text": "Despite human existence being perpetually shrouded in uncertainty, an indomitable flicker of hope continually propels us forward."
+  },
+  {
+    "script_no": 28,
+    "domain": null,
+    "named_entity": null,
+    "text": "Look beneath the surface of Bach’s music and you will find a fascinating hidden world of numerology and cunning craft"
+  },
+  {
+    "script_no": 29,
+    "domain": null,
+    "named_entity": null,
+    "text": "The monsoon's increasingly erratic unpredictability has engendered unprecedented uncertainty within the agricultural sector."
+  },
+  {
+    "script_no": 30,
+    "domain": null,
+    "named_entity": null,
+    "text": "One elegant method of how this might be possible is through the medium of music, which – aside from lyrical content – has the advantages of neither needing visual representation nor a lexicon of phonic objects"
+  },
+  {
+    "script_no": 31,
+    "domain": null,
+    "named_entity": null,
+    "text": "In the absence of adequate nutrition and consistent physical exertion, the susceptibility to chronic ailments escalates considerably."
+  },
+  {
+    "script_no": 32,
+    "domain": null,
+    "named_entity": null,
+    "text": "It holds because it succeeds in passing off injustice as order, domination as hierarchy, suffering as something meritorious."
+  },
+  {
+    "script_no": 33,
+    "domain": null,
+    "named_entity": null,
+    "text": "Without guaranteeing equitable access to quality education, eradicating entrenched societal disparities appears virtually unattainable."
+  },
+  {
+    "script_no": 34,
+    "domain": null,
+    "named_entity": null,
+    "text": "Absent mutual trust and candid communication, no relationship can withstand the vicissitudes of time."
+  },
+  {
+    "script_no": 35,
+    "domain": null,
+    "named_entity": null,
+    "text": "Bach’s name in the German notation system happens to spell out a haunting chromatic melody"
+  },
+  {
+    "script_no": 36,
+    "domain": null,
+    "named_entity": null,
+    "text": "Reconciling time-honored traditions with the relentless march of modernity remains among contemporary society's most formidable challenges."
+  },
+  {
+    "script_no": 37,
+    "domain": null,
+    "named_entity": null,
+    "text": "Pre-industrial economic systems do not generate a very big surplus. In highly stratified ancient republics, citizenship was often reserved for the rich and powerful."
+  },
+  {
+    "script_no": 38,
+    "domain": null,
+    "named_entity": null,
+    "text": "Absent discipline, unwavering commitment, and relentless practice, athletic excellence remains an unattainable aspiration."
+  },
+  {
+    "script_no": 39,
+    "domain": null,
+    "named_entity": null,
+    "text": "Creativity, boundless and unquantifiable, remains humanity's most enigmatic and extraordinary cognitive faculty."
+  },
+  {
+    "script_no": 40,
+    "domain": null,
+    "named_entity": null,
+    "text": "Emotions suppressed within the subconscious frequently manifest unexpectedly, subtly influencing our conscious behavior."
+  },
+  {
+    "script_no": 41,
+    "domain": null,
+    "named_entity": null,
+    "text": "For Gandhi, the category of Dalit is itself an offence against the varna system, insofar as it is a category that presupposes a hierarchical ranking and excludes some people from spiritual realisation."
+  },
+  {
+    "script_no": 42,
+    "domain": null,
+    "named_entity": null,
+    "text": "The story of how Indian history has been imagined, framed and written at different times by different people over the past 200 years is incredibly enthralling."
+  },
+  {
+    "script_no": 43,
+    "domain": null,
+    "named_entity": null,
+    "text": "Embarking toward unfamiliar, uncharted destinations invariably awakens a latent, adventurous spirit within us."
+  },
+  {
+    "script_no": 44,
+    "domain": null,
+    "named_entity": null,
+    "text": "He wrote that the early findings and interpretations about the Indus Valley Civilisation had ‘revolutionised the conception of ancient history’, with some scholars pointing to similarities between the Harappan people and the ‘Dravidian races and culture of South India’."
+  },
+  {
+    "script_no": 45,
+    "domain": null,
+    "named_entity": null,
+    "text": "Does authentic contentment reside within external accomplishments, or is it merely an internally cultivated state of tranquility?"
+  },
+  {
+    "script_no": 46,
+    "domain": null,
+    "named_entity": null,
+    "text": "Attaining genuine mental tranquility amid the relentless hustle of metropolitan existence grows increasingly elusive."
+  },
+  {
+    "script_no": 47,
+    "domain": null,
+    "named_entity": null,
+    "text": "The migrants from the northwest were descendants of pastoralists from the Eurasian Steppe region."
+  },
+  {
+    "script_no": 48,
+    "domain": null,
+    "named_entity": null,
+    "text": "Absent robust cybersecurity measures, safeguarding personal data within the digital realm becomes nearly impossible."
+  },
+  {
+    "script_no": 49,
+    "domain": null,
+    "named_entity": null,
+    "text": "From the vantage point of today, the 2000-1000 BCE time period looks extremely dynamic with regard to demographic and cultural changes in the subcontinent."
+  },
+  {
+    "script_no": 50,
+    "domain": null,
+    "named_entity": null,
+    "text": "It needs to be remembered that the labels of ASI and ANI were devised by geneticists in the context of abstract modelling"
+  }
+]
