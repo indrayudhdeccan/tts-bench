@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/admin";
 import { aggregateWinsFromVotes, computeElo, winRate } from "@/lib/elo";
 import type { LeaderboardData } from "@/lib/types";
 
@@ -11,6 +12,8 @@ export async function GET(request: Request) {
   const languageCode = searchParams.get("language") || DEFAULT_ARENA_LANGUAGE;
 
   const supabase = await createClient();
+  // Votes RLS only allows users to read their own rows; leaderboard needs all votes.
+  const admin = createServiceClient();
 
   const { data: lang } = await supabase.from("languages").select("id").eq("code", languageCode).single();
   if (!lang) {
@@ -35,12 +38,12 @@ export async function GET(request: Request) {
   const [{ data: allModels }, { data: votes }, { data: issueRows }] = await Promise.all([
     supabase.from("models").select("*").eq("active", true).order("sort_order"),
     scriptIds.length
-      ? supabase
+      ? admin
           .from("votes")
           .select("vote_type, result, clip_a_type, clip_a_model_id, clip_b_type, clip_b_model_id, script_id")
           .in("script_id", scriptIds)
       : Promise.resolve({ data: [] as never[] }),
-    supabase.from("v_issue_counts_by_model").select("*"),
+    admin.from("v_issue_counts_by_model").select("*"),
   ]);
 
   const models =
