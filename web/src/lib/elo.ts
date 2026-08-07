@@ -88,3 +88,24 @@ export function aggregateWinsFromVotes(
 
   return { wins, totals };
 }
+
+/** Build win matrix from aggregated DB view rows (each row has n wins). */
+export function aggregateWinsFromMmView(
+  rows: Array<{ winner_id: string | null; loser_id: string | null; n: number }>
+) {
+  const wins: Record<string, Record<string, number>> = {};
+  const totals: Record<string, number> = {};
+
+  for (const row of rows) {
+    const w = row.winner_id;
+    const l = row.loser_id;
+    const n = row.n || 0;
+    if (!w || !l || w === l || n <= 0) continue;
+    wins[w] = wins[w] || {};
+    wins[w][l] = (wins[w][l] || 0) + n;
+    totals[w] = (totals[w] || 0) + n;
+    totals[l] = (totals[l] || 0) + n;
+  }
+
+  return { wins, totals };
+}

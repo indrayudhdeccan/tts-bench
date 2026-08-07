@@ -1,19 +1,64 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
-import { aggregateWinsFromVotes, computeElo, winRate } from "@/lib/elo";
+import {
+  aggregateWinsFromMmView,
+  aggregateWinsFromVotes,
+  computeElo,
+  winRate,
+} from "@/lib/elo";
 import type { LeaderboardData } from "@/lib/types";
 
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
 import { resolveRunForLanguage } from "@/lib/arena-run";
+
+async function loadModelVsModelWins(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  scriptIds: string[]
+) {
+  if (!scriptIds.length) {
+    return { wins: {}, totals: {} };
+  }
+
+  // Preferred: public aggregate view filtered by script (migration 007).
+  const { data: viewRows, error: viewErr } = await supabase
+    .from("v_model_vs_model_wins_by_script")
+    .select("winner_id, loser_id, n")
+    .in("script_id", scriptIds);
+
+  if (!viewErr) {
+    return aggregateWinsFromMmView(viewRows || []);
+  }
+
+  // Migration 007 not applied yet — legacy global view (anon-readable, all languages combined).
+  const { data: globalRows, error: globalErr } = await supabase
+    .from("v_model_vs_model_wins")
+    .select("winner_id, loser_id, n");
+
+  if (!globalErr && globalRows?.length) {
+    return aggregateWinsFromMmView(globalRows);
+  }
+
+  // Last resort: service role votes table.
+  try {
+    const admin = createServiceClient();
+    const { data: votes } = await admin
+      .from("votes")
+      .select(
+        "vote_type, result, clip_a_type, clip_a_model_id, clip_b_type, clip_b_model_id, script_id"
+      )
+      .in("script_id", scriptIds);
+    return aggregateWinsFromVotes(votes || [], "model_vs_model");
+  } catch {
+    return { wins: {}, totals: {} };
+  }
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const languageCode = searchParams.get("language") || DEFAULT_ARENA_LANGUAGE;
 
   const supabase = await createClient();
-  // Votes RLS only allows users to read their own rows; leaderboard needs all votes.
-  const admin = createServiceClient();
 
   const { data: lang } = await supabase.from("languages").select("id").eq("code", languageCode).single();
   if (!lang) {
@@ -35,15 +80,10 @@ export async function GET(request: Request) {
     benchModelIds = [...new Set((clipRows || []).map((c) => c.model_id as string))];
   }
 
-  const [{ data: allModels }, { data: votes }, { data: issueRows }] = await Promise.all([
+  const [{ data: allModels }, mm, { data: issueRows }] = await Promise.all([
     supabase.from("models").select("*").eq("active", true).order("sort_order"),
-    scriptIds.length
-      ? admin
-          .from("votes")
-          .select("vote_type, result, clip_a_type, clip_a_model_id, clip_b_type, clip_b_model_id, script_id")
-          .in("script_id", scriptIds)
-      : Promise.resolve({ data: [] as never[] }),
-    admin.from("v_issue_counts_by_model").select("*"),
+    loadModelVsModelWins(supabase, scriptIds),
+    supabase.from("v_issue_counts_by_model").select("*"),
   ]);
 
   const models =
@@ -71,8 +111,7 @@ export async function GET(request: Request) {
     voicesByModel.set(v.model_id as string, list);
   }
 
-  const mm = aggregateWinsFromVotes(votes || [], "model_vs_model");
-  const mh = aggregateWinsFromVotes(votes || [], "model_vs_human");
+  const mh = { wins: {} as Record<string, Record<string, number>>, totals: {} as Record<string, number> };
   const eloMap = computeElo(modelIds, mm.wins);
 
   const ranked = models
