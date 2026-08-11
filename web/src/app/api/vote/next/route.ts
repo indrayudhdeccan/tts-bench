@@ -13,6 +13,44 @@ function shufflePair<T>(a: T, b: T): [T, T] {
   return Math.random() > 0.5 ? [a, b] : [b, a];
 }
 
+type ModelClipRow = {
+  model_id: string;
+  public_url: string | null;
+  storage_path: string;
+};
+
+function distinctModelIds(clips: ModelClipRow[]): string[] {
+  return [...new Set(clips.map((c) => c.model_id).filter(Boolean))];
+}
+
+/** Pick two clips from two uniformly random distinct models (voice chosen at random within each model). */
+function pickModelVsModelClips(pool: ModelClipRow[]): [ModelClipRow, ModelClipRow] | null {
+  const byModel = new Map<string, ModelClipRow[]>();
+  for (const clip of pool) {
+    if (!clip.model_id) continue;
+    const list = byModel.get(clip.model_id) || [];
+    list.push(clip);
+    byModel.set(clip.model_id, list);
+  }
+
+  const modelIds = [...byModel.keys()];
+  if (modelIds.length < 2) return null;
+
+  const modelA = pick(modelIds);
+  const otherModels = modelIds.filter((id) => id !== modelA);
+  const modelB = pick(otherModels);
+
+  return [pick(byModel.get(modelA)!), pick(byModel.get(modelB)!)];
+}
+
+function clipToVoteSide(clip: ModelClipRow): VotePairClip {
+  return {
+    type: "model",
+    model_id: clip.model_id,
+    audio_url: clip.public_url || publicStorageUrl(clip.storage_path, "model-clips"),
+  };
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const voteType = (searchParams.get("vote_type") || "model_vs_model") as VoteType;
@@ -68,7 +106,7 @@ export async function GET(request: Request) {
     const readyClips = clips || [];
     const primaryRef = refs?.[0];
 
-    if (voteType === "model_vs_model" && readyClips.length >= 2) {
+    if (voteType === "model_vs_model" && distinctModelIds(readyClips).length >= 2) {
       eligible.push(script);
     }
     if (voteType === "model_vs_human" && primaryRef && readyClips.length >= 1) {
@@ -102,30 +140,20 @@ export async function GET(request: Request) {
   const primaryRef = refs?.[0];
 
   if (voteType === "model_vs_model") {
-    const pool = clips || [];
-    if (pool.length < 2) return NextResponse.json({ error: "Not enough clips" }, { status: 404 });
-    let ca = pick(pool);
-    let cb = pick(pool);
-    let tries = 0;
-    while (ca.model_id === cb.model_id && tries++ < 20) cb = pick(pool);
-    if (ca.model_id === cb.model_id) return NextResponse.json({ error: "Need 2 models" }, { status: 404 });
+    const pool = (clips || []) as ModelClipRow[];
+    const picked = pickModelVsModelClips(pool);
+    if (!picked) {
+      return NextResponse.json({ error: "Need 2 models with clips on this script" }, { status: 404 });
+    }
 
-    [ca, cb] = shufflePair(ca, cb);
+    const [ca, cb] = shufflePair(...picked);
 
     const pair: VotePair = {
       vote_type: voteType,
       script,
       run_id: runId,
-      clip_a: {
-        type: "model",
-        model_id: ca.model_id,
-        audio_url: ca.public_url || publicStorageUrl(ca.storage_path, "model-clips"),
-      },
-      clip_b: {
-        type: "model",
-        model_id: cb.model_id,
-        audio_url: cb.public_url || publicStorageUrl(cb.storage_path, "model-clips"),
-      },
+      clip_a: clipToVoteSide(ca),
+      clip_b: clipToVoteSide(cb),
     } as VotePair & { run_id: string };
 
     return NextResponse.json(pair);
