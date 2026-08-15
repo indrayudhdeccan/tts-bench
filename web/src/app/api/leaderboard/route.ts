@@ -5,6 +5,7 @@ import type { LeaderboardData } from "@/lib/types";
 
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
 import { resolveRunForLanguage } from "@/lib/arena-run";
+import { publicModelName } from "@/lib/public-model-name";
 
 async function loadModelVsModelWins(
   supabase: ReturnType<typeof createPublicClient>,
@@ -99,20 +100,6 @@ export async function GET(request: Request) {
   const modelIds = models.map((m) => m.id);
   const modelSlugSet = new Set(models.map((m) => m.slug));
 
-  const { data: voiceRows } = await supabase
-    .from("model_voices")
-    .select("model_id, voice_key, label, is_default")
-    .in("model_id", modelIds)
-    .eq("active", true)
-    .order("is_default", { ascending: false });
-
-  const voicesByModel = new Map<string, Array<{ voice_key: string; label: string }>>();
-  for (const v of voiceRows || []) {
-    const list = voicesByModel.get(v.model_id as string) || [];
-    list.push({ voice_key: v.voice_key as string, label: v.label as string });
-    voicesByModel.set(v.model_id as string, list);
-  }
-
   const mh = { wins: {} as Record<string, Record<string, number>>, totals: {} as Record<string, number> };
   const eloMap = computeElo(modelIds, mm.wins);
 
@@ -120,10 +107,10 @@ export async function GET(request: Request) {
     .map((m) => ({
       id: m.id,
       slug: m.slug,
-      name: m.name,
+      name: publicModelName(m.name as string),
       color: m.color,
-      voice_label: m.voice_label,
-      voices: voicesByModel.get(m.id) || [],
+      voice_label: null,
+      voices: [],
       elo: eloMap[m.id] ?? 1000,
       ci: Math.round(40 + 120 / Math.sqrt((mm.totals[m.id] || 0) + 1)),
       matchups: mm.totals[m.id] || 0,
@@ -141,7 +128,7 @@ export async function GET(request: Request) {
   const vsHuman = models.map((m) => ({
     model_id: m.id,
     slug: m.slug,
-    name: m.name,
+    name: publicModelName(m.name as string),
     color: m.color,
     model_wins_pct: winRate(mh.wins, m.id, "human"),
     human_wins_pct: winRate(mh.wins, "human", m.id),

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { publicStorageUrl } from "@/lib/auth";
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
 import { resolveRunForLanguage } from "@/lib/arena-run";
+import { publicModelName } from "@/lib/public-model-name";
 
 function relationName(rel: unknown): string | null {
   if (!rel) return null;
@@ -77,7 +78,7 @@ export async function GET(request: Request) {
         return {
           id: c.id,
           model_slug: (c.models as { slug: string }).slug,
-          model_name: (c.models as { name: string }).name,
+          model_name: publicModelName((c.models as { name: string }).name),
           color: (c.models as { color: string }).color,
           voice_key: voiceKey || null,
           voice_label: voiceLabel,

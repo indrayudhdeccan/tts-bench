@@ -73,18 +73,7 @@ export function LeaderboardView() {
                     <td>
                       <div className="flex items-center gap-2">
                         <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />
-                        <div>
-                          <div className="font-medium">{m.name}</div>
-                          {m.voices?.length ? (
-                            <ul className="mt-1 space-y-0.5 text-xs text-[#6b7280]">
-                              {m.voices.map((v) => (
-                                <li key={v.voice_key}>{v.label}</li>
-                              ))}
-                            </ul>
-                          ) : m.voice_label ? (
-                            <div className="text-xs text-[#6b7280]">{m.voice_label}</div>
-                          ) : null}
-                        </div>
+                        <div className="font-medium">{m.name}</div>
                       </div>
                     </td>
                     <td className="text-lg font-bold tabular-nums">{m.elo}</td>
