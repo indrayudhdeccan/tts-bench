@@ -1,16 +1,36 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { publicStorageUrl } from "@/lib/auth";
 import type { VotePair, VotePairClip, VoteType } from "@/lib/types";
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
 import { resolveRunForLanguage } from "@/lib/arena-run";
-
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+import { aggregateWinsFromMmView } from "@/lib/elo";
+import { pickUniform, pickModelClipByMatchups, pickModelVsModelClips } from "@/lib/matchup-balance";
 
 function shufflePair<T>(a: T, b: T): [T, T] {
   return Math.random() > 0.5 ? [a, b] : [b, a];
+}
+
+/** Language-scoped matchup counts. Empty → uniform pairing (same as before). */
+async function loadMatchupTotals(scriptIds: string[]): Promise<Record<string, number>> {
+  if (!scriptIds.length) return {};
+  try {
+    const publicSb = createPublicClient();
+    const { data: rpcRows, error: rpcErr } = await publicSb.rpc("leaderboard_mm_wins", {
+      p_script_ids: scriptIds,
+    });
+    if (!rpcErr && rpcRows) return aggregateWinsFromMmView(rpcRows).totals;
+
+    const { data: viewRows, error: viewErr } = await publicSb
+      .from("v_model_vs_model_wins_by_script")
+      .select("winner_id, loser_id, n")
+      .in("script_id", scriptIds);
+    if (!viewErr && viewRows) return aggregateWinsFromMmView(viewRows).totals;
+  } catch {
+    // Fall through to uniform pairing.
+  }
+  return {};
 }
 
 type ModelClipRow = {
@@ -29,26 +49,6 @@ function clipModelActive(clip: ModelClipRow, activeIds?: Set<string>): boolean {
 
 function distinctModelIds(clips: ModelClipRow[]): string[] {
   return [...new Set(clips.map((c) => c.model_id).filter(Boolean))];
-}
-
-/** Pick two clips from two uniformly random distinct models (voice chosen at random within each model). */
-function pickModelVsModelClips(pool: ModelClipRow[]): [ModelClipRow, ModelClipRow] | null {
-  const byModel = new Map<string, ModelClipRow[]>();
-  for (const clip of pool) {
-    if (!clip.model_id) continue;
-    const list = byModel.get(clip.model_id) || [];
-    list.push(clip);
-    byModel.set(clip.model_id, list);
-  }
-
-  const modelIds = [...byModel.keys()];
-  if (modelIds.length < 2) return null;
-
-  const modelA = pick(modelIds);
-  const otherModels = modelIds.filter((id) => id !== modelA);
-  const modelB = pick(otherModels);
-
-  return [pick(byModel.get(modelA)!), pick(byModel.get(modelB)!)];
 }
 
 function clipToVoteSide(clip: ModelClipRow): VotePairClip {
@@ -132,7 +132,8 @@ export async function GET(request: Request) {
     );
   }
 
-  const script = pick(eligible);
+  const matchupTotals = await loadMatchupTotals(scripts.map((s) => s.id as string));
+  const script = pickUniform(eligible);
 
   const { data: clips } = await supabase
     .from("model_clips")
@@ -154,7 +155,7 @@ export async function GET(request: Request) {
     const pool = ((clips || []) as ModelClipRow[]).filter((c) =>
       clipModelActive(c, activeModelIds)
     );
-    const picked = pickModelVsModelClips(pool);
+    const picked = pickModelVsModelClips(pool, matchupTotals);
     if (!picked) {
       return NextResponse.json({ error: "Need 2 models with clips on this script" }, { status: 404 });
     }
@@ -176,7 +177,7 @@ export async function GET(request: Request) {
   const humanPool = ((clips || []) as ModelClipRow[]).filter((c) =>
     clipModelActive(c, activeModelIds)
   );
-  const mc = pick(humanPool);
+  const mc = pickModelClipByMatchups(humanPool, matchupTotals);
   if (!mc) return NextResponse.json({ error: "Need a model clip on this script" }, { status: 404 });
   if (!primaryRef) return NextResponse.json({ error: "No reference" }, { status: 404 });
 
