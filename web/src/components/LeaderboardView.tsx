@@ -77,7 +77,9 @@ export function LeaderboardView() {
                       </div>
                     </td>
                     <td className="text-lg font-bold tabular-nums">{m.elo}</td>
-                    <td className="text-[#6b7280]">{m.ci == null ? "—" : `±${m.ci}`}</td>
+                    <td className="whitespace-nowrap text-[#6b7280] tabular-nums">
+                      {m.ci == null ? "—" : `[+${m.ci.plus}, -${m.ci.minus}]`}
+                    </td>
                     <td>
                       <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[#f3f4f6]">
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: m.color }} />

@@ -102,7 +102,7 @@ export async function GET(request: Request) {
 
   const mh = { wins: {} as Record<string, Record<string, number>>, totals: {} as Record<string, number> };
   const eloMap = computeElo(modelIds, mm.wins);
-  const ciMap = bootstrapEloCi(modelIds, mm.wins);
+  const ciMap = bootstrapEloCi(modelIds, mm.wins, eloMap);
 
   const ranked = models
     .map((m) => ({

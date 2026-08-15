@@ -179,17 +179,20 @@ function percentile(sorted: number[], p: number): number {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
 }
 
+export type BootstrapCi = { plus: number; minus: number };
+
 /**
- * Voice Arena–style 95% CI half-width: 200-resample bootstrap of battles,
- * refit Bradley-Terry each time, (p97.5 − p2.5) / 2.
- * Does not change the published Elo point estimate. Votes are not written.
+ * Voice Arena–style 95% CI: 200-resample bootstrap of battles, refit
+ * Bradley-Terry, then +/− distances from the published Elo to the 97.5 / 2.5
+ * percentiles. Votes are not written; the point estimate is unchanged.
  */
 export function bootstrapEloCi(
   ids: string[],
   wins: Record<string, Record<string, number>>,
+  elo: Record<string, number>,
   samples = BOOTSTRAP_SAMPLES
-): Record<string, number | null> {
-  const out: Record<string, number | null> = {};
+): Record<string, BootstrapCi | null> {
+  const out: Record<string, BootstrapCi | null> = {};
   const appearances: Record<string, number> = {};
   for (const id of ids) {
     out[id] = null;
@@ -238,7 +241,11 @@ export function bootstrapEloCi(
     const xs = dist[id].slice().sort((x, y) => x - y);
     const lo = percentile(xs, 0.025);
     const hi = percentile(xs, 0.975);
-    out[id] = Math.max(0, Math.round((hi - lo) / 2));
+    const point = elo[id] ?? 1000;
+    out[id] = {
+      plus: Math.max(0, Math.round(hi - point)),
+      minus: Math.max(0, Math.round(point - lo)),
+    };
   }
   return out;
 }
