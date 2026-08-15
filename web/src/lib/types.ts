@@ -149,7 +149,7 @@ export interface EloRow {
   voice_label: string | null;
   voices: Array<{ voice_key: string; label: string }>;
   elo: number;
-  ci: number;
+  ci: number | null;
   matchups: number;
 }
 

@@ -20,6 +20,13 @@ export default function MethodologyPage() {
         <li>Voice = fixed per model via API parameter.</li>
         <li>Runs are versioned for reproducibility.</li>
       </ul>
+      <h3 className="font-medium">95% confidence interval</h3>
+      <p>
+        Elo is a Bradley-Terry fit on decisive model-vs-model votes. The ± interval is a 200-resample
+        bootstrap of those battles (same method as Voice Arena): refit Elo on each resample and take
+        half the 2.5–97.5 percentile range. New votes update Elo and CI on the next leaderboard load.
+        Votes themselves are never rewritten.
+      </p>
       <h3 className="font-medium">Database</h3>
       <p>
         All votes are stored in Supabase Postgres with user attribution, RLS, and admin-managed corpus

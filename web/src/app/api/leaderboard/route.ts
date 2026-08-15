@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPublicClient } from "@/lib/supabase/public";
-import { aggregateWinsFromMmView, computeElo, restrictWinsToModels, winRate } from "@/lib/elo";
+import { aggregateWinsFromMmView, bootstrapEloCi, computeElo, restrictWinsToModels, winRate } from "@/lib/elo";
 import type { LeaderboardData } from "@/lib/types";
 
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
@@ -102,6 +102,7 @@ export async function GET(request: Request) {
 
   const mh = { wins: {} as Record<string, Record<string, number>>, totals: {} as Record<string, number> };
   const eloMap = computeElo(modelIds, mm.wins);
+  const ciMap = bootstrapEloCi(modelIds, mm.wins);
 
   const ranked = models
     .map((m) => ({
@@ -112,7 +113,7 @@ export async function GET(request: Request) {
       voice_label: null,
       voices: [],
       elo: eloMap[m.id] ?? 1000,
-      ci: Math.round(40 + 120 / Math.sqrt((mm.totals[m.id] || 0) + 1)),
+      ci: ciMap[m.id],
       matchups: mm.totals[m.id] || 0,
     }))
     .sort((a, b) => b.elo - a.elo);

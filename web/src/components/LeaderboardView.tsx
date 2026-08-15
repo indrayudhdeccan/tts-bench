@@ -59,7 +59,7 @@ export function LeaderboardView() {
                 <th>#</th>
                 <th>Model</th>
                 <th>Elo</th>
-                <th>±CI</th>
+                <th>95% CI</th>
                 <th>Bar</th>
                 <th>Matchups</th>
               </tr>
@@ -77,7 +77,7 @@ export function LeaderboardView() {
                       </div>
                     </td>
                     <td className="text-lg font-bold tabular-nums">{m.elo}</td>
-                    <td className="text-[#6b7280]">±{m.ci}</td>
+                    <td className="text-[#6b7280]">{m.ci == null ? "—" : `±${m.ci}`}</td>
                     <td>
                       <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[#f3f4f6]">
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: m.color }} />
