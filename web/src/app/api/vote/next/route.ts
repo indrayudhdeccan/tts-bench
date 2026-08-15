@@ -17,7 +17,15 @@ type ModelClipRow = {
   model_id: string;
   public_url: string | null;
   storage_path: string;
+  models?: { active?: boolean } | { active?: boolean }[] | null;
 };
+
+function clipModelActive(clip: ModelClipRow, activeIds?: Set<string>): boolean {
+  if (activeIds && !activeIds.has(clip.model_id)) return false;
+  const rel = clip.models;
+  const active = Array.isArray(rel) ? rel[0]?.active : rel?.active;
+  return active !== false;
+}
 
 function distinctModelIds(clips: ModelClipRow[]): string[] {
   return [...new Set(clips.map((c) => c.model_id).filter(Boolean))];
@@ -84,6 +92,7 @@ export async function GET(request: Request) {
 
   const { data: models } = await supabase.from("models").select("*").eq("active", true);
   if (!models?.length) return NextResponse.json({ error: "No models" }, { status: 404 });
+  const activeModelIds = new Set(models.map((m) => m.id as string));
 
   // Scripts that have required clips for this vote type
   const eligible: typeof scripts = [];
@@ -103,7 +112,9 @@ export async function GET(request: Request) {
       .eq("active", true)
       .order("is_primary", { ascending: false });
 
-    const readyClips = clips || [];
+    const readyClips = ((clips || []) as ModelClipRow[]).filter((c) =>
+      clipModelActive(c, activeModelIds)
+    );
     const primaryRef = refs?.[0];
 
     if (voteType === "model_vs_model" && distinctModelIds(readyClips).length >= 2) {
@@ -140,7 +151,9 @@ export async function GET(request: Request) {
   const primaryRef = refs?.[0];
 
   if (voteType === "model_vs_model") {
-    const pool = (clips || []) as ModelClipRow[];
+    const pool = ((clips || []) as ModelClipRow[]).filter((c) =>
+      clipModelActive(c, activeModelIds)
+    );
     const picked = pickModelVsModelClips(pool);
     if (!picked) {
       return NextResponse.json({ error: "Need 2 models with clips on this script" }, { status: 404 });
@@ -160,7 +173,11 @@ export async function GET(request: Request) {
   }
 
   // model_vs_human
-  const mc = pick(clips || []);
+  const humanPool = ((clips || []) as ModelClipRow[]).filter((c) =>
+    clipModelActive(c, activeModelIds)
+  );
+  const mc = pick(humanPool);
+  if (!mc) return NextResponse.json({ error: "Need a model clip on this script" }, { status: 404 });
   if (!primaryRef) return NextResponse.json({ error: "No reference" }, { status: 404 });
 
   const humanClip = {

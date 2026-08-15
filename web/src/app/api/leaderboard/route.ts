@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPublicClient } from "@/lib/supabase/public";
-import { aggregateWinsFromMmView, computeElo, winRate } from "@/lib/elo";
+import { aggregateWinsFromMmView, computeElo, restrictWinsToModels, winRate } from "@/lib/elo";
 import type { LeaderboardData } from "@/lib/types";
 
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
@@ -79,7 +79,7 @@ export async function GET(request: Request) {
     benchModelIds = [...new Set((clipRows || []).map((c) => c.model_id as string))];
   }
 
-  const [{ data: allModels }, mm, { data: issueRows }] = await Promise.all([
+  const [{ data: allModels }, rawMm, { data: issueRows }] = await Promise.all([
     supabase.from("models").select("*").eq("active", true).order("sort_order"),
     loadModelVsModelWins(supabase, scriptIds, benchModelIds),
     supabase.from("v_issue_counts_by_model").select("*"),
@@ -89,6 +89,8 @@ export async function GET(request: Request) {
     benchModelIds.length > 0
       ? (allModels || []).filter((m) => benchModelIds.includes(m.id))
       : allModels || [];
+  const visibleIds = models.map((m) => m.id);
+  const mm = restrictWinsToModels(rawMm, visibleIds);
 
   if (!models.length) {
     return NextResponse.json({ models: [], h2h: {}, vsHuman: [], issueCounts: {} });

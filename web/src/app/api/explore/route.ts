@@ -46,10 +46,11 @@ export async function GET(request: Request) {
     const { data: clips } = run?.id
       ? await supabase
           .from("model_clips")
-          .select("*, models(slug, name, color)")
+          .select("*, models!inner(slug, name, color, active)")
           .eq("script_id", s.id)
           .eq("run_id", run.id)
           .eq("status", "ready")
+          .eq("models.active", true)
       : { data: [] };
 
     out.push({

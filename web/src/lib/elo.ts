@@ -109,3 +109,26 @@ export function aggregateWinsFromMmView(
 
   return { wins, totals };
 }
+
+/** Keep only matchups where both models are still on the public board. Votes stay in the DB. */
+export function restrictWinsToModels(
+  mm: { wins: Record<string, Record<string, number>>; totals: Record<string, number> },
+  visibleIds: Iterable<string>
+) {
+  const visible = new Set(visibleIds);
+  const wins: Record<string, Record<string, number>> = {};
+  const totals: Record<string, number> = {};
+
+  for (const [winner, losers] of Object.entries(mm.wins)) {
+    if (!visible.has(winner)) continue;
+    for (const [loser, n] of Object.entries(losers)) {
+      if (!visible.has(loser) || !n) continue;
+      wins[winner] = wins[winner] || {};
+      wins[winner][loser] = n;
+      totals[winner] = (totals[winner] || 0) + n;
+      totals[loser] = (totals[loser] || 0) + n;
+    }
+  }
+
+  return { wins, totals };
+}
