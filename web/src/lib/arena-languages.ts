@@ -37,6 +37,14 @@ export function requestLanguageMailto() {
   return `mailto:${REQUEST_LANGUAGE_EMAIL}?subject=${subject}&body=${body}`;
 }
 
+export function requestModelMailto() {
+  const subject = encodeURIComponent("Request new model for Project Beatles TTS Bench");
+  const body = encodeURIComponent(
+    "Hi,\n\nI'd like to request the following TTS model be added to the arena:\n\nModel:\nProvider:\nLanguage / locale:\nReason / use case:\n\nThanks!"
+  );
+  return `mailto:${REQUEST_LANGUAGE_EMAIL}?subject=${subject}&body=${body}`;
+}
+
 export function requestFullDatasetMailto(languageCode: string, sampleCount: number) {
   const label = arenaLanguageLabel(languageCode);
   const subject = encodeURIComponent(`Request full ${label} explore dataset — Project Beatles TTS Bench`);

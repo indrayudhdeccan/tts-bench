@@ -5,6 +5,7 @@ import {
   ARENA_LANGUAGES,
   parseArenaLanguage,
   requestLanguageMailto,
+  requestModelMailto,
   arenaLanguageLabel,
 } from "@/lib/arena-languages";
 
@@ -41,12 +42,20 @@ export function LanguageTabs() {
             </button>
           );
         })}
-        <a
-          href={requestLanguageMailto()}
-          className="ml-auto flex items-center gap-1 px-3 py-2 text-sm text-[#3b82f6] transition hover:text-[#2563eb]"
-        >
-          + Request language
-        </a>
+        <div className="ml-auto flex items-center gap-1">
+          <a
+            href={requestLanguageMailto()}
+            className="flex items-center gap-1 px-3 py-2 text-sm text-[#3b82f6] transition hover:text-[#2563eb]"
+          >
+            + Request language
+          </a>
+          <a
+            href={requestModelMailto()}
+            className="flex items-center gap-1 px-3 py-2 text-sm text-[#3b82f6] transition hover:text-[#2563eb]"
+          >
+            + Request model
+          </a>
+        </div>
       </div>
       <div className="mx-auto max-w-6xl px-4 pb-3">
         <p className="text-xs text-[#6b7280]">
