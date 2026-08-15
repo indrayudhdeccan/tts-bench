@@ -25,8 +25,9 @@ export default function MethodologyPage() {
         Elo is a Bradley-Terry fit on decisive model-vs-model votes. The 95% CI is a 200-resample
         bootstrap of those battles (same method as Voice Arena): refit Elo on each resample and take
         the 2.5 and 97.5 percentiles. The column shows [+a, −b] — how far Elo can move up and down
-        from the published score. New votes update Elo and CI on the next leaderboard load. Votes
-        themselves are never rewritten.
+        from the published score. Rank shows 2(2–3) when the same bootstrap puts the model in a
+        range of places (Voice Arena style). New votes update Elo, CI, and rank range on the next
+        leaderboard load. Votes themselves are never rewritten.
       </p>
       <h3 className="font-medium">Database</h3>
       <p>

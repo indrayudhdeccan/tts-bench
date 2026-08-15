@@ -69,7 +69,11 @@ export function LeaderboardView() {
                 const pct = maxElo === minElo ? 50 : ((m.elo - minElo) / (maxElo - minElo)) * 100;
                 return (
                   <tr key={m.id}>
-                    <td>{i + 1}</td>
+                    <td className="whitespace-nowrap tabular-nums">
+                      {m.rankLo != null && m.rankHi != null && m.rankLo !== m.rankHi
+                        ? `${i + 1}(${m.rankLo}–${m.rankHi})`
+                        : i + 1}
+                    </td>
                     <td>
                       <div className="flex items-center gap-2">
                         <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />

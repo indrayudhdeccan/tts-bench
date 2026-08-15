@@ -180,22 +180,40 @@ function percentile(sorted: number[], p: number): number {
 }
 
 export type BootstrapCi = { plus: number; minus: number };
+export type BootstrapInterval = {
+  ci: BootstrapCi | null;
+  rankLo: number | null;
+  rankHi: number | null;
+};
+
+function ranksFromElo(ids: string[], elo: Record<string, number>): Record<string, number> {
+  const ordered = [...ids].sort((a, b) => {
+    const d = (elo[b] ?? 1000) - (elo[a] ?? 1000);
+    return d !== 0 ? d : a.localeCompare(b);
+  });
+  const ranks: Record<string, number> = {};
+  ordered.forEach((id, i) => {
+    ranks[id] = i + 1;
+  });
+  return ranks;
+}
 
 /**
- * Voice Arena–style 95% CI: 200-resample bootstrap of battles, refit
- * Bradley-Terry, then +/− distances from the published Elo to the 97.5 / 2.5
- * percentiles. Votes are not written; the point estimate is unchanged.
+ * Voice Arena–style 95% CI and rank range: 200-resample bootstrap of battles,
+ * refit Bradley-Terry each time. CI is +/− from the published Elo to the
+ * 97.5 / 2.5 Elo percentiles. Rank range is the 2.5 / 97.5 rank percentiles.
+ * Votes are not written; the point estimate is unchanged.
  */
 export function bootstrapEloCi(
   ids: string[],
   wins: Record<string, Record<string, number>>,
   elo: Record<string, number>,
   samples = BOOTSTRAP_SAMPLES
-): Record<string, BootstrapCi | null> {
-  const out: Record<string, BootstrapCi | null> = {};
+): Record<string, BootstrapInterval> {
+  const out: Record<string, BootstrapInterval> = {};
   const appearances: Record<string, number> = {};
   for (const id of ids) {
-    out[id] = null;
+    out[id] = { ci: null, rankLo: null, rankHi: null };
     appearances[id] = 0;
   }
 
@@ -215,7 +233,8 @@ export function bootstrapEloCi(
   if (!pairs.length) return out;
 
   const rng = mulberry32(hashWins(wins) || 1);
-  const dist: Record<string, number[]> = Object.fromEntries(ids.map((id) => [id, []]));
+  const eloDist: Record<string, number[]> = Object.fromEntries(ids.map((id) => [id, []]));
+  const rankDist: Record<string, number[]> = Object.fromEntries(ids.map((id) => [id, []]));
 
   for (let s = 0; s < samples; s++) {
     const boot: Record<string, Record<string, number>> = {};
@@ -232,19 +251,31 @@ export function bootstrapEloCi(
         boot[pair.b][pair.a] = ba;
       }
     }
-    const elo = computeElo(ids, boot);
-    for (const id of ids) dist[id].push(elo[id] ?? 1000);
+    const sampleElo = computeElo(ids, boot);
+    const sampleRanks = ranksFromElo(ids, sampleElo);
+    for (const id of ids) {
+      eloDist[id].push(sampleElo[id] ?? 1000);
+      rankDist[id].push(sampleRanks[id]);
+    }
   }
 
+  const nModels = ids.length;
   for (const id of ids) {
     if (!appearances[id]) continue;
-    const xs = dist[id].slice().sort((x, y) => x - y);
+    const xs = eloDist[id].slice().sort((x, y) => x - y);
+    const rs = rankDist[id].slice().sort((x, y) => x - y);
     const lo = percentile(xs, 0.025);
     const hi = percentile(xs, 0.975);
     const point = elo[id] ?? 1000;
+    const loR = Math.min(nModels, Math.max(1, Math.round(percentile(rs, 0.025))));
+    const hiR = Math.min(nModels, Math.max(1, Math.round(percentile(rs, 0.975))));
     out[id] = {
-      plus: Math.max(0, Math.round(hi - point)),
-      minus: Math.max(0, Math.round(point - lo)),
+      ci: {
+        plus: Math.max(0, Math.round(hi - point)),
+        minus: Math.max(0, Math.round(point - lo)),
+      },
+      rankLo: Math.min(loR, hiR),
+      rankHi: Math.max(loR, hiR),
     };
   }
   return out;

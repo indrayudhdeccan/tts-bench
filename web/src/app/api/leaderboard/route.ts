@@ -113,7 +113,9 @@ export async function GET(request: Request) {
       voice_label: null,
       voices: [],
       elo: eloMap[m.id] ?? 1000,
-      ci: ciMap[m.id],
+      ci: ciMap[m.id]?.ci ?? null,
+      rankLo: ciMap[m.id]?.rankLo ?? null,
+      rankHi: ciMap[m.id]?.rankHi ?? null,
       matchups: mm.totals[m.id] || 0,
     }))
     .sort((a, b) => b.elo - a.elo);

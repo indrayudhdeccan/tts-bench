@@ -150,6 +150,8 @@ export interface EloRow {
   voices: Array<{ voice_key: string; label: string }>;
   elo: number;
   ci: { plus: number; minus: number } | null;
+  rankLo: number | null;
+  rankHi: number | null;
   matchups: number;
 }
 
