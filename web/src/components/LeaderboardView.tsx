@@ -102,7 +102,7 @@ export function LeaderboardView() {
       }
       if (latKey === "p50") return cmpNum(a.ttfa?.p50, b.ttfa?.p50, latDir);
       if (latKey === "range") return cmpNum(a.ttfa?.range, b.ttfa?.range, latDir);
-      if (latKey === "span") return cmpNum(a.ttfa?.min, b.ttfa?.min, latDir);
+      if (latKey === "span") return cmpNum(a.ttfa?.max, b.ttfa?.max, latDir);
       return cmpNum(a.ttfa?.silence, b.ttfa?.silence, latDir);
     });
     return rows;
