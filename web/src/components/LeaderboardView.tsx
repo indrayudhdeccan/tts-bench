@@ -268,8 +268,8 @@ export function LeaderboardView() {
       <section className="panel">
         <h2 className="text-lg font-semibold">Latency</h2>
         <p className="mb-4 text-sm text-[#6b7280]">
-          Perceived time-to-first-audio from 5 scripts. P50 is the usual wait. P25–P75 is how jumpy
-          that wait is. Min–max is best vs worst. Silence is hush at the start of the clip.
+          P50 is the usual wait. P25–P75 is how jumpy that wait is. Min–max is best vs worst. Silence is
+          hush at the start of the clip.
         </p>
         {latencyRows.length ? (
           <div className="overflow-x-auto">
