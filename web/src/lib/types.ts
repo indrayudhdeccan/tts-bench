@@ -141,6 +141,16 @@ export interface VotePayload {
   tags_b?: string[];
 }
 
+export interface TtfaStats {
+  p25: number;
+  p50: number;
+  p75: number;
+  range: number;
+  min: number;
+  max: number;
+  silence: number;
+}
+
 export interface EloRow {
   id: string;
   slug: string;
@@ -153,6 +163,7 @@ export interface EloRow {
   rankLo: number | null;
   rankHi: number | null;
   matchups: number;
+  ttfa: TtfaStats | null;
 }
 
 export interface LeaderboardData {

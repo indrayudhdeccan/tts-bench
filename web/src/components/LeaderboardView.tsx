@@ -1,25 +1,128 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useArenaLanguage } from "@/hooks/useArenaLanguage";
 import { arenaLanguageLabel } from "@/lib/arena-languages";
 import { HUMAN_COMPARE_UI_ENABLED } from "@/lib/arena-features";
 import { LoadingBar, LoadingPanel } from "@/components/LoadingBar";
 import type { LeaderboardData } from "@/lib/types";
 
+type Dir = "asc" | "desc";
+type MainKey = "rank" | "name" | "elo" | "ci" | "matchups" | "ttfa";
+type LatKey = "name" | "p50" | "range" | "span" | "silence";
+
+function SortTh<K extends string>({
+  label,
+  col,
+  sortKey,
+  dir,
+  onSort,
+}: {
+  label: string;
+  col: K;
+  sortKey: K;
+  dir: Dir;
+  onSort: (col: K) => void;
+}) {
+  const active = sortKey === col;
+  return (
+    <th>
+      <button type="button" className="sort" data-active={active} onClick={() => onSort(col)}>
+        {label}
+        <span aria-hidden>{active ? (dir === "asc" ? "↑" : "↓") : "↕"}</span>
+      </button>
+    </th>
+  );
+}
+
+function cmpNum(a: number | null | undefined, b: number | null | undefined, dir: Dir) {
+  if (a == null && b == null) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+  return dir === "asc" ? a - b : b - a;
+}
+
+function ms(n: number | null | undefined) {
+  return n == null ? "—" : `${n} ms`;
+}
+
 export function LeaderboardView() {
   const lang = useArenaLanguage();
   const [data, setData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mainKey, setMainKey] = useState<MainKey>("elo");
+  const [mainDir, setMainDir] = useState<Dir>("desc");
+  const [latKey, setLatKey] = useState<LatKey>("p50");
+  const [latDir, setLatDir] = useState<Dir>("asc");
 
   useEffect(() => {
     setLoading(true);
     setData(null);
+    setMainKey("elo");
+    setMainDir("desc");
+    setLatKey("p50");
+    setLatDir("asc");
     fetch(`/api/leaderboard?language=${encodeURIComponent(lang)}`)
       .then((r) => r.json())
       .then(setData)
       .finally(() => setLoading(false));
   }, [lang]);
+
+  const ranked = useMemo(() => {
+    if (!data?.models) return [];
+    return data.models.map((m, i) => ({ ...m, place: i + 1 }));
+  }, [data]);
+
+  const mainRows = useMemo(() => {
+    const rows = [...ranked];
+    rows.sort((a, b) => {
+      if (mainKey === "name") {
+        const n = a.name.localeCompare(b.name);
+        return mainDir === "asc" ? n : -n;
+      }
+      if (mainKey === "rank") return cmpNum(a.place, b.place, mainDir);
+      if (mainKey === "elo") return cmpNum(a.elo, b.elo, mainDir);
+      if (mainKey === "ci") {
+        const aw = a.ci ? a.ci.plus + a.ci.minus : null;
+        const bw = b.ci ? b.ci.plus + b.ci.minus : null;
+        return cmpNum(aw, bw, mainDir);
+      }
+      if (mainKey === "matchups") return cmpNum(a.matchups, b.matchups, mainDir);
+      return cmpNum(a.ttfa?.p50, b.ttfa?.p50, mainDir);
+    });
+    return rows;
+  }, [ranked, mainKey, mainDir]);
+
+  const latencyRows = useMemo(() => {
+    const rows = ranked.filter((m) => m.ttfa);
+    rows.sort((a, b) => {
+      if (latKey === "name") {
+        const n = a.name.localeCompare(b.name);
+        return latDir === "asc" ? n : -n;
+      }
+      if (latKey === "p50") return cmpNum(a.ttfa?.p50, b.ttfa?.p50, latDir);
+      if (latKey === "range") return cmpNum(a.ttfa?.range, b.ttfa?.range, latDir);
+      if (latKey === "span") return cmpNum(a.ttfa?.min, b.ttfa?.min, latDir);
+      return cmpNum(a.ttfa?.silence, b.ttfa?.silence, latDir);
+    });
+    return rows;
+  }, [ranked, latKey, latDir]);
+
+  function toggleMain(col: MainKey) {
+    if (mainKey === col) setMainDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setMainKey(col);
+      setMainDir(col === "name" || col === "ttfa" || col === "rank" ? "asc" : "desc");
+    }
+  }
+
+  function toggleLat(col: LatKey) {
+    if (latKey === col) setLatDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setLatKey(col);
+      setLatDir(col === "name" ? "asc" : "asc");
+    }
+  }
 
   if (loading) {
     return (
@@ -56,23 +159,24 @@ export function LeaderboardView() {
           <table className="data">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Model</th>
-                <th>Elo</th>
-                <th>95% CI</th>
+                <SortTh label="#" col="rank" sortKey={mainKey} dir={mainDir} onSort={toggleMain} />
+                <SortTh label="Model" col="name" sortKey={mainKey} dir={mainDir} onSort={toggleMain} />
+                <SortTh label="Elo" col="elo" sortKey={mainKey} dir={mainDir} onSort={toggleMain} />
+                <SortTh label="95% CI" col="ci" sortKey={mainKey} dir={mainDir} onSort={toggleMain} />
                 <th>Bar</th>
-                <th>Matchups</th>
+                <SortTh label="Matchups" col="matchups" sortKey={mainKey} dir={mainDir} onSort={toggleMain} />
+                <SortTh label="TTFA (P50)" col="ttfa" sortKey={mainKey} dir={mainDir} onSort={toggleMain} />
               </tr>
             </thead>
             <tbody>
-              {data.models.map((m, i) => {
+              {mainRows.map((m) => {
                 const pct = maxElo === minElo ? 50 : ((m.elo - minElo) / (maxElo - minElo)) * 100;
                 return (
                   <tr key={m.id}>
                     <td className="whitespace-nowrap tabular-nums">
                       {m.rankLo != null && m.rankHi != null && m.rankLo !== m.rankHi
-                        ? `${i + 1}(${m.rankLo}–${m.rankHi})`
-                        : i + 1}
+                        ? `${m.place}(${m.rankLo}–${m.rankHi})`
+                        : m.place}
                     </td>
                     <td>
                       <div className="flex items-center gap-2">
@@ -90,6 +194,7 @@ export function LeaderboardView() {
                       </div>
                     </td>
                     <td>{m.matchups}</td>
+                    <td className="whitespace-nowrap tabular-nums">{ms(m.ttfa?.p50)}</td>
                   </tr>
                 );
               })}
@@ -157,6 +262,55 @@ export function LeaderboardView() {
               </div>
             ))}
           </div>
+        )}
+      </section>
+
+      <section className="panel">
+        <h2 className="text-lg font-semibold">Latency</h2>
+        <p className="mb-4 text-sm text-[#6b7280]">
+          Perceived time-to-first-audio from 5 scripts. P50 is the usual wait. P25–P75 is how jumpy
+          that wait is. Min–max is best vs worst. Silence is hush at the start of the clip.
+        </p>
+        {latencyRows.length ? (
+          <div className="overflow-x-auto">
+            <table className="data">
+              <thead>
+                <tr>
+                  <SortTh label="Model" col="name" sortKey={latKey} dir={latDir} onSort={toggleLat} />
+                  <SortTh label="TTFA (P50)" col="p50" sortKey={latKey} dir={latDir} onSort={toggleLat} />
+                  <SortTh label="P25–P75" col="range" sortKey={latKey} dir={latDir} onSort={toggleLat} />
+                  <SortTh label="Min–max" col="span" sortKey={latKey} dir={latDir} onSort={toggleLat} />
+                  <SortTh label="Silence" col="silence" sortKey={latKey} dir={latDir} onSort={toggleLat} />
+                </tr>
+              </thead>
+              <tbody>
+                {latencyRows.map((m) => {
+                  const t = m.ttfa!;
+                  return (
+                    <tr key={m.id}>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />
+                          <div className="font-medium">{m.name}</div>
+                        </div>
+                      </td>
+                      <td className="tabular-nums font-semibold">{ms(t.p50)}</td>
+                      <td className="whitespace-nowrap tabular-nums">
+                        {t.p25}–{t.p75} ms
+                        <span className="ml-1 text-[#6b7280]">({t.range})</span>
+                      </td>
+                      <td className="whitespace-nowrap tabular-nums">
+                        {t.min}–{t.max} ms
+                      </td>
+                      <td className="tabular-nums">{ms(t.silence)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-sm text-[#6b7280]">No TTFA probe for {arenaLanguageLabel(lang)} yet.</p>
         )}
       </section>
 

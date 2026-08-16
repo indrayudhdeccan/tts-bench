@@ -1,0 +1,30 @@
+{
+  "en-IN": {
+    "Cartesia Sonic 3.5": { "slug": "cartesia-sonic-en-in", "p25": 289, "p50": 406, "p75": 535, "range": 246, "min": 283, "max": 682, "silence": 140 },
+    "Fish S2.1 Pro": { "slug": "fish-s21-en-in", "p25": 566, "p50": 590, "p75": 648, "range": 82, "min": 537, "max": 731, "silence": 60 },
+    "MAI-Voice-2": { "slug": "microsoft-mai-en-in", "p25": 880, "p50": 1022, "p75": 1209, "range": 329, "min": 767, "max": 1613, "silence": 260 },
+    "ElevenLabs v3": { "slug": "elevenlabs-en-in", "p25": 1001, "p50": 1058, "p75": 1220, "range": 219, "min": 962, "max": 1222, "silence": 110 },
+    "Sarvam Bulbul v3": { "slug": "sarvam-bulbul-en-in", "p25": 4293, "p50": 4364, "p75": 4578, "range": 285, "min": 3840, "max": 5996, "silence": 90 },
+    "Gemini 3.1 Flash TTS": { "slug": "google-gemini-en-in", "p25": 6670, "p50": 8529, "p75": 11289, "range": 4619, "min": 5406, "max": 11348, "silence": 280 }
+  },
+  "hi-IN": {
+    "Cartesia Sonic 3.5": { "slug": "cartesia-sonic-hi-in", "p25": 379, "p50": 389, "p75": 463, "range": 84, "min": 339, "max": 525, "silence": 170 },
+    "Fish S2.1 Pro": { "slug": "fish-s21-hi-in", "p25": 678, "p50": 750, "p75": 904, "range": 226, "min": 566, "max": 1171, "silence": 50 },
+    "MAI-Voice-2": { "slug": "microsoft-mai-hi-in", "p25": 778, "p50": 828, "p75": 1053, "range": 275, "min": 763, "max": 1654, "silence": 290 },
+    "Grok Voice TTS 1.0": { "slug": "grok-voice-hi-in", "p25": 833, "p50": 876, "p75": 1109, "range": 276, "min": 746, "max": 1377, "silence": 130 },
+    "ElevenLabs v3": { "slug": "elevenlabs-hi-in", "p25": 1246, "p50": 1278, "p75": 1279, "range": 33, "min": 951, "max": 1323, "silence": 90 },
+    "MiniMax Speech 2.8 HD": { "slug": "minimax-hd-hi-in", "p25": 972, "p50": 1650, "p75": 1915, "range": 943, "min": 829, "max": 1987, "silence": 200 },
+    "Kokoro 82M": { "slug": "kokoro-hi-in", "p25": 1698, "p50": 1891, "p75": 2681, "range": 983, "min": 1595, "max": 4098, "silence": 520 },
+    "Sarvam Bulbul v3": { "slug": "sarvam-bulbul-hi-in", "p25": 6868, "p50": 7495, "p75": 9517, "range": 2649, "min": 6783, "max": 12163, "silence": 90 },
+    "Gemini 3.1 Flash TTS": { "slug": "google-gemini-hi-in", "p25": 8749, "p50": 9867, "p75": 13055, "range": 4306, "min": 8495, "max": 18943, "silence": 270 }
+  },
+  "te-IN": {
+    "Cartesia Sonic 3.5": { "slug": "cartesia-sonic-te-in", "p25": 332, "p50": 350, "p75": 372, "range": 40, "min": 322, "max": 423, "silence": 150 },
+    "Fish S2.1 Pro": { "slug": "fish-s21-te-in", "p25": 649, "p50": 739, "p75": 843, "range": 194, "min": 594, "max": 885, "silence": 70 },
+    "MAI-Voice-2": { "slug": "microsoft-mai-te-in", "p25": 664, "p50": 931, "p75": 979, "range": 315, "min": 607, "max": 1479, "silence": 200 },
+    "Grok Voice TTS 1.0": { "slug": "grok-voice-te-in", "p25": 950, "p50": 1228, "p75": 1237, "range": 287, "min": 868, "max": 1715, "silence": 90 },
+    "ElevenLabs v3": { "slug": "elevenlabs-te-in", "p25": 1347, "p50": 1357, "p75": 1425, "range": 78, "min": 1237, "max": 1481, "silence": 100 },
+    "Sarvam Bulbul v3": { "slug": "sarvam-bulbul-te-in", "p25": 3662, "p50": 3836, "p75": 4123, "range": 461, "min": 3546, "max": 4591, "silence": 210 },
+    "Gemini 3.1 Flash TTS": { "slug": "google-gemini-te-in", "p25": 7759, "p50": 7920, "p75": 8619, "range": 860, "min": 6992, "max": 10761, "silence": 280 }
+  }
+}

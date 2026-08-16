@@ -95,6 +95,14 @@ table.data th {
   @apply border-b border-[#e5e7eb] px-3 py-2 text-left text-xs uppercase tracking-wide text-[#6b7280];
 }
 
+table.data th button.sort {
+  @apply inline-flex items-center gap-1 text-left text-xs uppercase tracking-wide text-[#6b7280] hover:text-[#111827];
+}
+
+table.data th button.sort[data-active="true"] {
+  @apply text-[#111827];
+}
+
 table.data td {
   @apply border-b border-[#f3f4f6] px-3 py-2 align-middle text-[#374151];
 }

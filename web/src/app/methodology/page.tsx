@@ -29,6 +29,12 @@ export default function MethodologyPage() {
         range of places (Voice Arena style). New votes update Elo, CI, and rank range on the next
         leaderboard load. Votes themselves are never rewritten.
       </p>
+      <h3 className="font-medium">Latency (TTFA)</h3>
+      <p>
+        Perceived time-to-first-audio from a 5-script probe: first audio byte plus leading silence
+        in the clip. The leaderboard column is the median (P50). The latency table also shows
+        P25–P75 (how jumpy the wait is), min–max, and median leading silence. Not part of Elo.
+      </p>
       <h3 className="font-medium">Database</h3>
       <p>
         All votes are stored in Supabase Postgres with user attribution, RLS, and admin-managed corpus

@@ -6,6 +6,7 @@ import type { LeaderboardData } from "@/lib/types";
 import { DEFAULT_ARENA_LANGUAGE } from "@/lib/arena-languages";
 import { resolveRunForLanguage } from "@/lib/arena-run";
 import { publicModelName } from "@/lib/public-model-name";
+import { lookupTtfa } from "@/lib/ttfa";
 
 async function loadModelVsModelWins(
   supabase: ReturnType<typeof createPublicClient>,
@@ -117,6 +118,7 @@ export async function GET(request: Request) {
       rankLo: ciMap[m.id]?.rankLo ?? null,
       rankHi: ciMap[m.id]?.rankHi ?? null,
       matchups: mm.totals[m.id] || 0,
+      ttfa: lookupTtfa(languageCode, publicModelName(m.name as string), m.slug as string),
     }))
     .sort((a, b) => b.elo - a.elo);
 
