@@ -43,9 +43,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?next=/vote", request.url));
   }
 
+  if (user && (request.nextUrl.pathname === "/vote" || request.nextUrl.pathname.startsWith("/api/votes"))) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin, approval_status, is_rater")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.is_admin) {
+      if (profile?.approval_status === "pending") {
+        if (request.nextUrl.pathname.startsWith("/api/")) {
+          return NextResponse.json({ error: "Account pending admin approval" }, { status: 403 });
+        }
+        return NextResponse.redirect(new URL("/pending-approval", request.url));
+      }
+      if (profile?.approval_status === "revoked" || profile?.is_rater === false) {
+        if (request.nextUrl.pathname.startsWith("/api/")) {
+          return NextResponse.json({ error: "Voting access revoked" }, { status: 403 });
+        }
+        return NextResponse.redirect(new URL("/access-revoked", request.url));
+      }
+    }
+  }
+
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/vote"],
+  matcher: ["/admin/:path*", "/vote", "/api/votes", "/pending-approval", "/access-revoked"],
 };

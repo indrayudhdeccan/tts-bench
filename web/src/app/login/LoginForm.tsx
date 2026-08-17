@@ -17,6 +17,12 @@ export function LoginForm() {
   const lang = parseArenaLanguage(searchParams.get("lang"));
   const next = hrefWithLang(searchParams.get("next") || "/vote", lang);
 
+  async function afterAuth() {
+    const access = await fetch("/api/auth/access").then((r) => r.json());
+    if (access.redirect) router.push(access.redirect);
+    else router.push(next);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -39,14 +45,14 @@ export function LoginForm() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (error) setMsg("Account created but sign-in failed: " + error.message);
-      else router.push(next);
+      else await afterAuth();
       return;
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) setMsg(error.message);
-    else router.push(next);
+    else await afterAuth();
   }
 
   return (
@@ -54,7 +60,9 @@ export function LoginForm() {
       {loading && <LoadingBar fixed />}
       <div className="mx-auto max-w-md panel">
         <h2 className="mb-4 text-lg font-semibold">{mode === "signin" ? "Sign in" : "Create account"}</h2>
-        <p className="mb-4 text-sm text-[#6b7280]">Required to vote. Admin access is granted via profile flag.</p>
+        <p className="mb-4 text-sm text-[#6b7280]">
+          Sign up to vote — new accounts require admin approval before voting.
+        </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input className="input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <input className="input" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />

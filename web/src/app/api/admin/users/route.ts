@@ -73,5 +73,7 @@ export async function POST(request: Request) {
     await admin.from("profiles").update(profilePatch).eq("id", userId);
   }
 
+  await admin.from("profiles").update({ approval_status: "approved" }).eq("id", userId);
+
   return NextResponse.json({ ok: true, id: userId });
 }

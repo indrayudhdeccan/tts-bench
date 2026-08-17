@@ -11,6 +11,7 @@ const links = [
   ["domains", "Domains"],
   ["speakers", "Speakers"],
   ["issue-tags", "Issue tags"],
+  ["approvals", "Approvals"],
   ["votes", "Votes"],
   ["users", "Users"],
   ["settings", "Site settings"],

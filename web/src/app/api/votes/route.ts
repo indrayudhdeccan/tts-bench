@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { canVote } from "@/lib/access";
 
 const voteSchema = z.object({
   vote_type: z.enum(["model_vs_model", "model_vs_human"]),
@@ -21,6 +22,15 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin, is_rater, approval_status")
+    .eq("id", user.id)
+    .single();
+  if (!canVote(profile)) {
+    return NextResponse.json({ error: "Account not approved to vote" }, { status: 403 });
+  }
 
   const body = voteSchema.safeParse(await request.json());
   if (!body.success) {
